@@ -283,14 +283,14 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
           <table className="min-w-full border-collapse bg-card">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[120px] sm:min-w-[140px] z-20 text-xs sm:text-sm">
+              <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[80px] sm:min-w-[140px] z-20 text-xs sm:text-sm">
                 カテゴリ
               </th>
-              <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[130px] sm:min-w-[150px] z-20 text-xs sm:text-sm" style={{ left: '120px' }}>
+              <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[90px] sm:min-w-[150px] z-20 text-xs sm:text-sm" style={{ left: '80px' }}>
                 詳細
               </th>
               {months.map(month => (
-                <th key={month} className="border-r p-2 sm:p-4 text-center font-semibold min-w-[80px] sm:min-w-[100px] text-xs sm:text-sm">
+                <th key={month} className="border-r p-2 sm:p-4 text-center font-semibold min-w-[100px] sm:min-w-[100px] text-xs sm:text-sm">
                   {formatMonth(month)}
                 </th>
               ))}
@@ -314,14 +314,23 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                         className="sticky left-0 bg-background border-r p-2 sm:p-4 font-semibold text-center align-middle border-b z-20"
                         rowSpan={usedSubcategories.length}
                       >
-                        <div className="text-xs sm:text-sm text-primary bg-primary/10 px-2 sm:px-3 py-1 sm:py-2 rounded-md">
-                          {categoryInfo.name}
+                        <div className="text-xs sm:text-sm text-primary bg-primary/10 px-1 sm:px-3 py-1 sm:py-2 rounded-md truncate">
+                          <span className="hidden sm:inline">{categoryInfo.name}</span>
+                          <span className="sm:hidden">
+                            {categoryInfo.name === '現金・預金' ? '現金' : 
+                             categoryInfo.name === '証券・投資' ? '投資' :
+                             categoryInfo.name === '仮想通貨' ? '仮想' :
+                             categoryInfo.name === 'その他' ? '他' : categoryInfo.name}
+                          </span>
                         </div>
                       </td>
                     )}
-                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-20" style={{ left: '120px' }}>
-                      <div className="pl-1 sm:pl-2 font-medium text-muted-foreground">
-                        {subCategoryName}
+                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-20" style={{ left: '80px' }}>
+                      <div className="pl-1 sm:pl-2 font-medium text-muted-foreground truncate">
+                        <span className="hidden sm:inline">{subCategoryName}</span>
+                        <span className="sm:hidden">
+                          {subCategoryName.length > 6 ? subCategoryName.substring(0, 6) + '...' : subCategoryName}
+                        </span>
                       </div>
                     </td>
                     {months.map(month => {
