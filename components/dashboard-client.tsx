@@ -299,7 +299,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             あなたの資産状況を把握し、将来の計画を立てましょう
           </p>
           <p className="text-xs sm:text-sm text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 px-3 py-2 rounded-md">
-            💾 データはローカルストレージに保存されます（あなたの端末内のみ・他人からは見えません）
+            💾 データはローカルストレージに保存されます（リセットボタンで削除可能）
           </p>
         </div>
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
