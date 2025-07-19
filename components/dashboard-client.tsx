@@ -102,7 +102,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       'ideco': 'stocks',
       'pension': 'stocks',
       'crypto': 'crypto',
-      'other': 'bonds'
+      'other': 'other'
     }
     return mapping[category] || 'cash'
   }

@@ -22,14 +22,14 @@ interface AllocationPieProps {
   assets: Asset[]
 }
 
-// Color palette for different asset classes
+// Color palette for different asset classes (lighter colors)
 const COLORS = {
-  stocks: '#10b981',   // green
-  bonds: '#3b82f6',    // blue
-  cash: '#f59e0b',     // amber
-  crypto: '#8b5cf6',   // purple
-  real_estate: '#ef4444', // red
-  commodities: '#06b6d4'  // cyan
+  stocks: '#86efac',   // light green
+  other: '#93c5fd',    // light blue
+  cash: '#fbbf24',     // light amber
+  crypto: '#c4b5fd',   // light purple
+  real_estate: '#fca5a5', // light red
+  commodities: '#67e8f9'  // light cyan
 }
 
 export function AllocationPie({ assets }: AllocationPieProps) {
@@ -57,7 +57,7 @@ export function AllocationPie({ assets }: AllocationPieProps) {
       'ideco': 'stocks',
       'pension': 'stocks',
       'crypto': 'crypto',
-      'other': 'bonds'
+      'other': 'other'
     }
     return mapping[category] || 'cash'
   }
@@ -158,7 +158,7 @@ export function AllocationPie({ assets }: AllocationPieProps) {
       const data = payload[0].payload
       const assetClassNames = {
         stocks: '株式',
-        bonds: '債券',
+        other: 'その他',
         cash: '現金・預金',
         crypto: '仮想通貨',
         real_estate: '不動産',
@@ -231,7 +231,7 @@ export function AllocationPie({ assets }: AllocationPieProps) {
               formatter={(value, entry) => {
                 const assetClassNames = {
                   stocks: '株式',
-                  bonds: '債券', 
+                  other: 'その他', 
                   cash: '現金・預金',
                   crypto: '仮想通貨',
                   real_estate: '不動産',
@@ -239,7 +239,7 @@ export function AllocationPie({ assets }: AllocationPieProps) {
                 }
                 const displayName = assetClassNames[value as keyof typeof assetClassNames] || value
                 return (
-                  <span style={{ color: entry.color, fontSize: '14px' }}>
+                  <span style={{ color: entry.color, fontSize: '14px', opacity: 0.8 }}>
                     {displayName}
                   </span>
                 )
@@ -272,7 +272,7 @@ export function AllocationPie({ assets }: AllocationPieProps) {
                 {showAssetClassTooltip && (
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded-lg whitespace-nowrap z-10">
                     資産クラスとは、投資対象の種類別分類のことです。<br/>
-                    例：株式、債券、現金、仮想通貨など。分散投資のリスク管理に重要です。
+                    例：株式、その他、現金、仮想通貨など。分散投資のリスク管理に重要です。
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
                   </div>
                 )}
