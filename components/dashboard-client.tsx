@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react'
 import { PortfolioChart } from '@/components/portfolio-chart'
 import { AllocationPie } from '@/components/allocation-pie'
+import { DetailedAllocationPie } from '@/components/detailed-allocation-pie'
 import { ForecastSlider } from '@/components/forecast-slider'
 import { AssetForm } from '@/components/asset-form'
 import { EmptyState } from '@/components/empty-state'
@@ -327,38 +328,37 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         </div>
       </div>
 
-      {/* Top Row: Portfolio Value and Asset Allocation Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
-        <div className="space-y-4">
-          {/* Portfolio Value */}
-          <div className="bg-card border rounded-lg p-6">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <h3 className="text-sm font-medium">ポートフォリオ価値</h3>
-            </div>
-            <p className="text-2xl font-bold mt-2">
-              ¥{Math.round(currentValue).toLocaleString()}
-            </p>
-            <p className={`text-sm mt-1 ${growthAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {growthAmount >= 0 ? '+' : ''}¥{Math.round(growthAmount).toLocaleString()} ({growthPercent.toFixed(1)}%)
-            </p>
+      {/* Top Row: Portfolio Value and Asset Class */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center space-x-2">
+            <DollarSign className="h-5 w-5 text-green-600" />
+            <h3 className="text-sm font-medium">ポートフォリオ価値</h3>
           </div>
-          
-          {/* Asset Class */}
-          <div className="bg-card border rounded-lg p-6">
-            <div className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-orange-600" />
-              <h3 className="text-sm font-medium">資産クラス</h3>
-            </div>
-            <p className="text-2xl font-bold mt-2">
-              {allocationData.length}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              分散投資
-            </p>
-          </div>
+          <p className="text-2xl font-bold mt-2">
+            ¥{Math.round(currentValue).toLocaleString()}
+          </p>
+          <p className={`text-sm mt-1 ${growthAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {growthAmount >= 0 ? '+' : ''}¥{Math.round(growthAmount).toLocaleString()} ({growthPercent.toFixed(1)}%)
+          </p>
         </div>
 
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center space-x-2">
+            <Target className="h-5 w-5 text-orange-600" />
+            <h3 className="text-sm font-medium">資産クラス</h3>
+          </div>
+          <p className="text-2xl font-bold mt-2">
+            {allocationData.length}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            分散投資
+          </p>
+        </div>
+      </div>
+
+      {/* Charts Row: Asset Allocation and Detailed Allocation */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <div className="bg-card border rounded-lg p-4 sm:p-6">
           <div className="space-y-2 mb-4">
             <h2 className="text-lg sm:text-xl font-semibold">資産配分</h2>
@@ -367,6 +367,16 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             </p>
           </div>
           <AllocationPie assets={assets} />
+        </div>
+
+        <div className="bg-card border rounded-lg p-4 sm:p-6">
+          <div className="space-y-2 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold">資産配分（詳細）</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              詳細カテゴリでの資産分散状況
+            </p>
+          </div>
+          <DetailedAllocationPie assets={assets} />
         </div>
       </div>
 

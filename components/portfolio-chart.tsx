@@ -199,7 +199,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
                 stroke="hsl(var(--primary))" 
                 strokeWidth={3}
                 name="総資産"
-                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                dot={false}
                 activeDot={{ r: 6 }}
               />
               
@@ -236,32 +236,39 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
                   'other_assets': 'その他'
                 }
                 
-                // カテゴリに応じた色とスタイルの設定
-                const getLineStyle = (category: string) => {
-                  if (category.startsWith('bank_') || category.startsWith('postal_') || 
-                      category.startsWith('time_') || category.startsWith('zaikeishochiku') || 
-                      category.startsWith('foreign_') || category.startsWith('cash_')) {
-                    // 現金・預金系 - オレンジ系（淡い）
-                    const colors = ['#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#fcd34d', '#f59e0b', '#d97706']
-                    return { color: colors[index % colors.length], dash: '2 2' }
-                  } else if (category.startsWith('securities_') || category.startsWith('nisa_') || 
-                            category.startsWith('ideco_') || category.startsWith('pension_') || 
-                            category.startsWith('real_estate_')) {
-                    // 証券・投資系 - グリーン系（淡い）
-                    const colors = ['#34d399', '#10b981', '#059669', '#047857', '#065f46', '#6ee7b7', '#34d399', '#10b981']
-                    return { color: colors[index % colors.length], dash: '3 3' }
-                  } else if (category.startsWith('crypto_')) {
-                    // 仮想通貨系 - パープル系（淡い）
-                    const colors = ['#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#c4b5fd', '#a78bfa', '#8b5cf6']
-                    return { color: colors[index % colors.length], dash: '4 4' }
-                  } else {
-                    // その他 - グレー系（淡い）
-                    const colors = ['#9ca3af', '#6b7280', '#4b5563', '#374151', '#1f2937', '#d1d5db', '#9ca3af', '#6b7280']
-                    return { color: colors[index % colors.length], dash: '5 5' }
+                // 詳細配分円グラフと同じ色パレット（明確に区別できる色）
+                const detailedColors = [
+                  '#d98b7f', '#e6b85c', '#b8c97a', '#7eb8a6', '#8db3d1', '#b695c4',
+                  '#d88ba1', '#b8a584', '#9cbe8f', '#7aa8b8', '#a59bd4', '#c48aa8',
+                  '#e09475', '#d1b866', '#9fc585', '#85b5a3', '#94a8d6', '#ba8fc0',
+                  '#d6967e', '#b09d7a', '#87b895', '#78a5b5', '#9f94d2', '#c38da5',
+                  '#e2987d', '#c4a76f', '#95be92', '#80b0b0', '#a396d0', '#be91b8',
+                  '#da9a81', '#b7a173', '#92c096', '#7ca8ad', '#9b98ce', '#c094b5'
+                ]
+                
+                // 色とスタイルの設定（線のタイプも含む）
+                const getLineStyle = (category: string, index: number) => {
+                  // 線のパターンを定義
+                  const linePatterns = [
+                    undefined,        // 実線
+                    '5 5',           // 破線（中）
+                    '2 2',           // 破線（短）
+                    '8 3',           // 破線（長）
+                    '3 3 1 3',       // 点線と破線の組み合わせ
+                    '1 3',           // 点線
+                    '10 5 2 5',      // 長破線と短破線
+                    '6 2 2 2',       // 破線と点線
+                    '4 4 2 4',       // 複合パターン1
+                    '8 2 2 2 2 2',   // 複合パターン2
+                  ]
+                  
+                  return { 
+                    color: detailedColors[index % detailedColors.length], 
+                    dash: linePatterns[index % linePatterns.length]
                   }
                 }
                 
-                const lineStyle = getLineStyle(category)
+                const lineStyle = getLineStyle(category, index)
                 const displayName = categoryNames[category as keyof typeof categoryNames] || category
                 
                 return (
@@ -270,8 +277,9 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
                     type="monotone" 
                     dataKey={category} 
                     stroke={lineStyle.color} 
-                    strokeWidth={1}
+                    strokeWidth={1.5}
                     name={displayName}
+                    dot={false}
                     strokeDasharray={lineStyle.dash}
                   />
                 )
