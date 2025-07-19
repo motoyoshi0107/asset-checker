@@ -147,26 +147,48 @@ export function ForecastSlider({ annualRate, monthlyInvest, currentAmount = 0, o
               <div className="relative">
                 <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">¥</span>
                 <input
-                  type="text"
-                  value={localCurrentAmount.toLocaleString()}
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={localCurrentAmount === 0 ? '' : localCurrentAmount}
                   onChange={(e) => {
-                    let value = e.target.value
-                    // 全角数字を半角数字に変換
-                    value = value.replace(/[０-９]/g, (s) => 
-                      String.fromCharCode(s.charCodeAt(0) - 0xFEE0)
-                    )
-                    const cleanValue = value.replace(/[^\d]/g, '')
-                    const newAmount = parseInt(cleanValue) || 0
-                    setLocalCurrentAmount(newAmount)
-                    onSettingsChange?.(localAnnualRate, localMonthlyInvest, newAmount)
+                    const value = e.target.value
+                    if (value === '') {
+                      setLocalCurrentAmount(0)
+                      onSettingsChange?.(localAnnualRate, localMonthlyInvest, 0)
+                    } else {
+                      const numValue = parseInt(value) || 0
+                      setLocalCurrentAmount(numValue)
+                      onSettingsChange?.(localAnnualRate, localMonthlyInvest, numValue)
+                    }
+                  }}
+                  onFocus={(e) => {
+                    // フォーカス時に0の場合は空にして入力しやすくする
+                    if (localCurrentAmount === 0) {
+                      e.target.value = ''
+                    }
+                  }}
+                  onBlur={(e) => {
+                    // ブラー時に空の場合は0に戻す
+                    if (e.target.value === '') {
+                      setLocalCurrentAmount(0)
+                      onSettingsChange?.(localAnnualRate, localMonthlyInvest, 0)
+                    }
                   }}
                   className="w-full p-2 pl-6 border rounded-md text-center focus:ring-2 focus:ring-primary focus:border-primary text-sm"
                   placeholder="0"
+                  min="0"
+                  step="1"
                 />
               </div>
               <p className="text-xs text-center text-muted-foreground">
                 既存の投資総資産額を入力
               </p>
+              {localCurrentAmount > 0 && (
+                <p className="text-xs text-center text-blue-600">
+                  表示: {localCurrentAmount.toLocaleString()}円
+                </p>
+              )}
             </div>
           </div>
 
@@ -176,25 +198,38 @@ export function ForecastSlider({ annualRate, monthlyInvest, currentAmount = 0, o
             </label>
             <div className="space-y-1">
               <input
-                type="text"
-                value={currentAge}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={currentAge === 0 ? '' : currentAge}
                 onChange={(e) => {
                   const value = e.target.value
                   if (value === '') {
                     setCurrentAge(0)
                   } else {
-                    // 全角数字を半角数字に変換
-                    const halfWidthValue = value.replace(/[０-９]/g, (s) => 
-                      String.fromCharCode(s.charCodeAt(0) - 0xFEE0)
-                    )
-                    const numValue = parseInt(halfWidthValue)
-                    if (!isNaN(numValue) && numValue >= 0) {
+                    const numValue = parseInt(value) || 0
+                    if (numValue >= 0 && numValue <= 120) {
                       setCurrentAge(numValue)
                     }
                   }
                 }}
+                onFocus={(e) => {
+                  // フォーカス時に0の場合は空にして入力しやすくする
+                  if (currentAge === 0) {
+                    e.target.value = ''
+                  }
+                }}
+                onBlur={(e) => {
+                  // ブラー時に空の場合は0に戻す
+                  if (e.target.value === '') {
+                    setCurrentAge(0)
+                  }
+                }}
                 className="w-full p-1.5 border rounded-md text-center focus:ring-2 focus:ring-primary focus:border-primary text-sm"
-                placeholder="0"
+                placeholder="年齢"
+                min="0"
+                max="120"
+                step="1"
               />
               <p className="text-xs text-center text-muted-foreground">
                 年齢を入力
