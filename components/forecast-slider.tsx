@@ -4,7 +4,7 @@
 // Forecast Slider Component with Projections
 // =============================================
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ForecastPoint } from '@/lib/types/database'
 
@@ -23,6 +23,15 @@ export function ForecastSlider({ annualRate, monthlyInvest, currentAmount = 0, o
   const [currentAge, setCurrentAge] = useState(0) // current age
   const [showTooltip, setShowTooltip] = useState(false)
   const [showCurrentAmountTooltip, setShowCurrentAmountTooltip] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check if mobile on client side
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Calculate compound interest forecast
   const forecastData = useMemo(() => {
@@ -93,19 +102,22 @@ export function ForecastSlider({ annualRate, monthlyInvest, currentAmount = 0, o
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium">{label}年後 ({data.age}歳)</p>
-          <p className="text-sm text-green-600">
-            総資産価値: {formatCurrency(data.value)}
+        <div className="bg-background border border-border rounded-lg p-2 sm:p-3 shadow-lg max-w-xs">
+          <p className="font-medium text-xs sm:text-sm">
+            {label}年後 
+            {currentAge > 0 && ` (${data.age}歳)`}
           </p>
-          <p className="text-sm" style={{ color: '#c084fc' }}>
+          <p className="text-xs sm:text-sm text-green-600">
+            総資産: {formatCurrency(data.value)}
+          </p>
+          <p className="text-xs sm:text-sm" style={{ color: '#c084fc' }}>
             投資利益: {formatCurrency(data.gains)}
           </p>
-          <p className="text-sm" style={{ color: '#60a5fa' }}>
-            月次投資額累計: {formatCurrency(data.contributions)}
+          <p className="text-xs sm:text-sm" style={{ color: '#60a5fa' }}>
+            月次投資累計: {formatCurrency(data.contributions)}
           </p>
-          <p className="text-sm" style={{ color: '#3b82f6' }}>
-            現状投資総資産: {formatCurrency(data.currentAmount)}
+          <p className="text-xs sm:text-sm" style={{ color: '#3b82f6' }}>
+            現状投資資産: {formatCurrency(data.currentAmount)}
           </p>
         </div>
       )
@@ -353,33 +365,46 @@ export function ForecastSlider({ annualRate, monthlyInvest, currentAmount = 0, o
       {/* Chart */}
       <div className="w-full h-96">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={forecastData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+          <BarChart data={forecastData} margin={{ 
+            top: 20, 
+            right: isMobile ? 5 : 10, 
+            left: isMobile ? 5 : 10, 
+            bottom: isMobile ? 50 : 60 
+          }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            
+            {/* Primary X-Axis: Year */}
             <XAxis 
               dataKey="year" 
               className="text-xs fill-muted-foreground"
               tick={{
-                fontSize: 11,
+                fontSize: isMobile ? 10 : 11,
                 textAnchor: 'middle'
               }}
               tickFormatter={(value) => `${value}年`}
-              interval={0}
+              interval={isMobile ? 'preserveStartEnd' : 0}
+              height={isMobile ? 40 : 25}
             />
-            <XAxis 
-              dataKey="year" 
-              className="text-xs fill-muted-foreground"
-              axisLine={false}
-              tickLine={false}
-              orientation="bottom"
-              tick={{
-                fontSize: 11,
-                textAnchor: 'middle',
-                dy: 3
-              }}
-              tickFormatter={(value) => `${currentAge + value}歳`}
-              interval={0}
-              xAxisId="age"
-            />
+            
+            {/* Secondary X-Axis: Age (desktop only) */}
+            {!isMobile && (
+              <XAxis 
+                dataKey="year" 
+                className="text-xs fill-muted-foreground"
+                axisLine={false}
+                tickLine={false}
+                orientation="bottom"
+                tick={{
+                  fontSize: 10,
+                  textAnchor: 'middle',
+                  dy: 35
+                }}
+                tickFormatter={(value) => `${currentAge + value}歳`}
+                interval={0}
+                xAxisId="age"
+                height={20}
+              />
+            )}
             <YAxis 
               tickFormatter={(value) => `¥${Math.round(value / 1000000).toFixed(0)}M`}
               className="text-xs fill-muted-foreground"
