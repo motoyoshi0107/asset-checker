@@ -1,4 +1,4 @@
-'use server'
+// Server Actions removed for static export
 
 // =============================================
 // Forecast Server Action - Wrapper for Edge Function
@@ -116,7 +116,9 @@ export function calculateForecastClient(params: ForecastRequest): ForecastRespon
     data.push({
       month: 0,
       year: 0,
+      age: 0, // Will be handled by the client component
       value: Math.round(balance),
+      currentAmount: Math.round(currentValue),
       contributions: 0,
       gains: 0
     })
@@ -137,7 +139,9 @@ export function calculateForecastClient(params: ForecastRequest): ForecastRespon
         data.push({
           month,
           year: Math.floor(month / 12),
+          age: 0, // Will be handled by the client component
           value: Math.round(balance),
+          currentAmount: Math.round(currentValue),
           contributions: Math.round(totalContributions),
           gains: Math.round(totalGains)
         })

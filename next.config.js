@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000']
-    }
-  },
+  // Static export configuration for Netlify
+  output: 'export',
+  trailingSlash: true,
   // Enable strict mode for better debugging
   reactStrictMode: true,
-  // Optimize images
+  // Optimize images for static export
   images: {
+    unoptimized: true,
     remotePatterns: []
   },
   // Environment variables for Supabase

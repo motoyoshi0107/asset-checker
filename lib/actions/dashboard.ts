@@ -1,4 +1,4 @@
-'use server'
+// Server Actions removed for static export
 
 // =============================================
 // Dashboard Server Actions - Mock Data Version

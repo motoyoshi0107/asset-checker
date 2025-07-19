@@ -142,6 +142,7 @@ export type ForecastPoint = {
   year: number
   age: number
   value: number
+  currentAmount: number
   contributions: number
   gains: number
 }
