@@ -327,45 +327,36 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         </div>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-card border rounded-lg p-6">
-          <div className="flex items-center space-x-2">
-            <DollarSign className="h-5 w-5 text-green-600" />
-            <h3 className="text-sm font-medium">ポートフォリオ価値</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">
-            ¥{Math.round(currentValue).toLocaleString()}
-          </p>
-          <p className={`text-sm mt-1 ${growthAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {growthAmount >= 0 ? '+' : ''}¥{Math.round(growthAmount).toLocaleString()} ({growthPercent.toFixed(1)}%)
-          </p>
-        </div>
-
-        <div className="bg-card border rounded-lg p-6">
-          <div className="flex items-center space-x-2">
-            <Target className="h-5 w-5 text-orange-600" />
-            <h3 className="text-sm font-medium">資産クラス</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">
-            {allocationData.length}
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            分散投資
-          </p>
-        </div>
-      </div>
-
-      {/* Charts Section */}
+      {/* Top Row: Portfolio Value and Asset Allocation Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
-        <div className="bg-card border rounded-lg p-4 sm:p-6">
-          <div className="space-y-2 mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold">ポートフォリオ成長</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              時系列での資産推移を確認
+        <div className="space-y-4">
+          {/* Portfolio Value */}
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              <h3 className="text-sm font-medium">ポートフォリオ価値</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">
+              ¥{Math.round(currentValue).toLocaleString()}
+            </p>
+            <p className={`text-sm mt-1 ${growthAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {growthAmount >= 0 ? '+' : ''}¥{Math.round(growthAmount).toLocaleString()} ({growthPercent.toFixed(1)}%)
             </p>
           </div>
-          <PortfolioChart data={chartData} />
+          
+          {/* Asset Class */}
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-2">
+              <Target className="h-5 w-5 text-orange-600" />
+              <h3 className="text-sm font-medium">資産クラス</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">
+              {allocationData.length}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              分散投資
+            </p>
+          </div>
         </div>
 
         <div className="bg-card border rounded-lg p-4 sm:p-6">
@@ -377,6 +368,17 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           </div>
           <AllocationPie assets={assets} />
         </div>
+      </div>
+
+      {/* Portfolio Growth Chart */}
+      <div className="bg-card border rounded-lg p-4 sm:p-6">
+        <div className="space-y-2 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold">ポートフォリオ成長</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            時系列での資産推移を確認
+          </p>
+        </div>
+        <PortfolioChart data={chartData} />
       </div>
 
       {/* Monthly Asset Management Table */}

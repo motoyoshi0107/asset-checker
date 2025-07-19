@@ -81,6 +81,13 @@ const calculateAfterTaxAmount = (asset: Asset): number => {
   return asset.amount
 }
 
+// 年度を取得（4月〜3月）
+const getFiscalYear = (month: string): number => {
+  const [year, monthNum] = month.split('-').map(Number)
+  // 4月〜12月は同年度、1月〜3月は前年度+1
+  return monthNum >= 4 ? year : year - 1
+}
+
 // 月別データを生成
 const generateMonthlyData = (assets: Asset[]) => {
   // 月別にグループ化
@@ -127,6 +134,16 @@ const generateMonthlyData = (assets: Asset[]) => {
     }
   }
 
+  // 年度ごとにグループ化
+  const fiscalYearGroups: Record<number, string[]> = {}
+  months.forEach(month => {
+    const fiscalYear = getFiscalYear(month)
+    if (!fiscalYearGroups[fiscalYear]) {
+      fiscalYearGroups[fiscalYear] = []
+    }
+    fiscalYearGroups[fiscalYear].push(month)
+  })
+
   // カテゴリごとのデータを整理（2段階構造）
   const categoryData: Record<string, Record<string, Record<string, Asset[]>>> = {}
   
@@ -142,7 +159,7 @@ const generateMonthlyData = (assets: Asset[]) => {
     })
   })
 
-  return { months, categoryData }
+  return { months, categoryData, fiscalYearGroups }
 }
 
 export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: MonthlyAssetTableProps) {
@@ -150,8 +167,28 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
   const [editValue, setEditValue] = useState('')
   const [showSubtotals, setShowSubtotals] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
+  const [openFiscalYears, setOpenFiscalYears] = useState<Set<number>>(new Set())
   
-  const { months, categoryData } = generateMonthlyData(assets)
+  const { months, categoryData, fiscalYearGroups } = generateMonthlyData(assets)
+  
+  // 初期状態で最新年度を開く
+  useEffect(() => {
+    const fiscalYears = Object.keys(fiscalYearGroups).map(Number).sort((a, b) => b - a)
+    if (fiscalYears.length > 0) {
+      setOpenFiscalYears(new Set([fiscalYears[0]]))
+    }
+  }, [fiscalYearGroups])
+  
+  // 年度の開閉を切り替え
+  const toggleFiscalYear = (fiscalYear: number) => {
+    const newOpenYears = new Set(openFiscalYears)
+    if (newOpenYears.has(fiscalYear)) {
+      newOpenYears.delete(fiscalYear)
+    } else {
+      newOpenYears.add(fiscalYear)
+    }
+    setOpenFiscalYears(newOpenYears)
+  }
   
   // 実際に資産が入力されているカテゴリのみを取得
   const usedCategories = Object.keys(ASSET_CATEGORIES).filter(mainCategory => {
@@ -278,296 +315,311 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="sm:hidden text-xs text-blue-600 mb-2 text-center">
-            ← 左右にスワイプして全てのデータを確認 →
-          </div>
-          <table className="min-w-full border-collapse bg-card">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[80px] sm:min-w-[140px] z-20 text-xs sm:text-sm">
-                カテゴリ
-              </th>
-              <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[90px] sm:min-w-[150px] z-20 text-xs sm:text-sm" style={{ left: '80px' }}>
-                詳細
-              </th>
-              {months.map(month => (
-                <th key={month} className="border-r p-2 sm:p-4 text-center font-semibold min-w-[100px] sm:min-w-[100px] text-xs sm:text-sm">
-                  {formatMonth(month)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {usedCategories.map(mainCategory => {
-              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-              const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
-                return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
-              })
-              
-              return usedSubcategories.map((subCategory, subIndex) => {
-                const subCategoryName = categoryInfo.subcategories[subCategory as keyof typeof categoryInfo.subcategories]
-                const isFirstSubCategory = subIndex === 0
-                
-                return (
-                  <tr key={`${mainCategory}-${subCategory}`} className="border-b hover:bg-muted/20 transition-colors">
-                    {isFirstSubCategory && (
-                      <td 
-                        className="sticky left-0 bg-background border-r p-2 sm:p-4 font-semibold text-center align-middle border-b z-20"
-                        rowSpan={usedSubcategories.length}
-                      >
-                        <div className="text-xs sm:text-sm text-primary bg-primary/10 px-1 sm:px-3 py-1 sm:py-2 rounded-md truncate">
-                          <span className="hidden sm:inline">{categoryInfo.name}</span>
-                          <span className="sm:hidden">
-                            {categoryInfo.name === '現金・預金' ? '現金' : 
-                             categoryInfo.name === '証券・投資' ? '投資' :
-                             categoryInfo.name === '仮想通貨' ? '仮想' :
-                             categoryInfo.name === 'その他' ? '他' : categoryInfo.name}
-                          </span>
-                        </div>
-                      </td>
-                    )}
-                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-20" style={{ left: '80px' }}>
-                      <div className="pl-1 sm:pl-2 font-medium text-muted-foreground truncate">
-                        <span className="hidden sm:inline">{subCategoryName}</span>
-                        <span className="sm:hidden">
-                          {subCategoryName.length > 6 ? subCategoryName.substring(0, 6) + '...' : subCategoryName}
-                        </span>
-                      </div>
-                    </td>
-                    {months.map(month => {
-                      const monthAssets = categoryData[mainCategory][subCategory][month]
-                      const totalAmount = monthAssets.reduce((sum, asset) => sum + calculateAfterTaxAmount(asset), 0)
-                      const isEditing = editingCell?.mainCategory === mainCategory && 
-                                       editingCell?.subCategory === subCategory && 
-                                       editingCell?.month === month
-                      
-                      return (
-                        <td key={month} className="border-r p-2 sm:p-4 text-right border-b">
-                          {isEditing ? (
-                            <div className="flex items-center justify-end space-x-1">
-                              <input
-                                type="number"
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="w-16 sm:w-24 p-1 sm:p-2 text-xs sm:text-sm border rounded-md text-right focus:ring-2 focus:ring-primary focus:border-primary"
-                                min="0"
-                                step="1"
-                                autoFocus
-                              />
-                              <button
-                                onClick={saveEdit}
-                                className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-                              >
-                                <Check className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </button>
-                              <button
-                                onClick={cancelEdit}
-                                className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                              >
-                                <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-end space-x-1 group">
-                              <button
-                                onClick={() => startEditing(mainCategory, subCategory, month)}
-                                className="opacity-0 group-hover:opacity-100 p-1 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-all"
-                              >
-                                <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </button>
-                              <span className="text-xs sm:text-sm font-medium">
-                                {formatAmount(totalAmount)}
-                              </span>
-                            </div>
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })
-            })}
-            
-            {/* 合計行 */}
-            <tr className="bg-gray-100 dark:bg-gray-800 font-semibold border-t-2 border-primary/20">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
-                <div className="text-primary font-bold text-xs sm:text-sm">
-                  合計
-                </div>
-              </td>
-              {months.map(month => {
-                const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-                  return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
-                    const monthAssets = categoryData[mainCategory][subCategory][month]
-                    return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
-                  }, 0)
-                }, 0)
-                
-                return (
-                  <td key={month} className="border-r p-2 sm:p-4 text-right">
-                    <div className="text-primary font-bold text-xs sm:text-sm">
-                      {formatAmount(monthTotal)}
-                    </div>
-                  </td>
-                )
-              })}
-            </tr>
-
-            {/* 先月対比行 */}
-            <tr className="bg-gray-100 dark:bg-gray-800 border-b">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
-                <div className="text-blue-400 font-semibold text-xs sm:text-sm">
-                  先月対比
-                </div>
-              </td>
-              {months.map((month, index) => {
-                const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-                  return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
-                    const monthAssets = categoryData[mainCategory][subCategory][month]
-                    return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
-                  }, 0)
-                }, 0)
-                
-                // 前月の合計を計算
-                const prevMonth = index > 0 ? months[index - 1] : null
-                const prevMonthTotal = prevMonth ? usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-                  return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
-                    const monthAssets = categoryData[mainCategory][subCategory][prevMonth]
-                    return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
-                  }, 0)
-                }, 0) : 0
-                
-                const difference = monthTotal - prevMonthTotal
-                const percentChange = prevMonthTotal > 0 ? (difference / prevMonthTotal) * 100 : 0
-                
-                return (
-                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
-                    {index === 0 ? (
-                      <div className="text-gray-400 text-xs sm:text-sm">-</div>
-                    ) : (
-                      <div className="text-xs sm:text-sm">
-                        <div className={`font-semibold ${difference >= 0 ? 'text-blue-400' : 'text-red-600'}`}>
-                          {difference >= 0 ? '+' : ''}{formatAmount(difference)}
-                        </div>
-                        <div className={`text-xs ${difference >= 0 ? 'text-blue-300' : 'text-red-500'}`}>
-                          {difference >= 0 ? '+' : ''}{percentChange.toFixed(1)}%
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                )
-              })}
-            </tr>
-
-            {/* 昨年度同月対比行 */}
-            <tr className="bg-gray-100 dark:bg-gray-800 border-b">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
-                <div className="text-green-400 font-semibold text-xs sm:text-sm">
-                  昨年同月対比
-                </div>
-              </td>
-              {months.map(month => {
-                const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-                  return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
-                    const monthAssets = categoryData[mainCategory][subCategory][month]
-                    return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
-                  }, 0)
-                }, 0)
-                
-                
-                // 昨年同月の合計を計算（修正版）
-                const [year, monthNum] = month.split('-')
-                const lastYearMonth = `${parseInt(year) - 1}-${monthNum}`
-                
-                // 昨年同月の資産を直接検索（元の方法に戻す）
-                const lastYearAssets = assets.filter(asset => {
-                  if (!asset || !asset.date) return false
-                  return asset.date.startsWith(lastYearMonth)
-                })
-                const lastYearMonthTotal = lastYearAssets.reduce((sum, asset) => {
-                  return sum + (asset.amount || 0)
-                }, 0)
-                
-                // デバッグ用ログ（詳細）
-                if (month === '2025-07') {
-                  console.log('=== 2025年7月の昨年同月対比詳細 ===')
-                  console.log('現在月:', month)
-                  console.log('昨年月:', lastYearMonth)
-                  console.log('昨年の資産データ:', lastYearAssets)
-                  console.log('昨年の合計:', lastYearMonthTotal)
-                  console.log('現在の合計:', monthTotal)
-                  console.log('差額:', monthTotal - lastYearMonthTotal)
-                  console.log('計算結果が正しいか:', {
-                    '期待値': '500000 (1000000 - 500000)',
-                    '実際の値': monthTotal - lastYearMonthTotal,
-                    '問題': lastYearMonthTotal === 0 ? '昨年の合計が0になっている' : '計算は正常'
-                  })
-                  
-                  // 全資産から2024年7月を検索
-                  const all2024Jul = assets.filter(asset => asset.date && asset.date.startsWith('2024-07'))
-                  console.log('2024年7月の全資産:', all2024Jul)
-                }
-                
-                const difference = monthTotal - lastYearMonthTotal
-                const percentChange = lastYearMonthTotal > 0 ? (difference / lastYearMonthTotal) * 100 : 0
-                
-                return (
-                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
-                    {lastYearMonthTotal === 0 && monthTotal === 0 ? (
-                      <div className="text-gray-400 text-xs sm:text-sm">-</div>
-                    ) : (
-                      <div className="text-xs sm:text-sm">
-                        <div className={`font-semibold ${difference >= 0 ? 'text-green-400' : 'text-red-600'}`}>
-                          {difference >= 0 ? '+' : ''}{formatAmount(difference)}
-                        </div>
-                        <div className={`text-xs ${difference >= 0 ? 'text-green-300' : 'text-red-500'}`}>
-                          {lastYearMonthTotal === 0 ? '∞%' : `${difference >= 0 ? '+' : ''}${percentChange.toFixed(1)}%`}
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                )
-              })}
-            </tr>
-            
-            {/* 大カテゴリ別小計行（表示・非表示切り替え可能） */}
-            {showSubtotals && usedCategories.map(mainCategory => {
-              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
-              const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
-                return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
-              })
+        <div className="space-y-4">
+          {/* 年度別アコーディオン */}
+          {Object.keys(fiscalYearGroups)
+            .map(Number)
+            .sort((a, b) => b - a) // 最新年度を上に
+            .map(fiscalYear => {
+              const yearMonths = fiscalYearGroups[fiscalYear]
+              const isOpen = openFiscalYears.has(fiscalYear)
               
               return (
-                <tr key={`${mainCategory}-subtotal`} className="bg-muted/20 border-b">
-                  <td className="sticky left-0 bg-muted/20 border-r p-2 sm:p-4 z-20" colSpan={2}>
-                    <div className="text-primary font-semibold text-xs sm:text-sm">
-                      {categoryInfo.name} 小計
+                <div key={fiscalYear} className="border border-border rounded-lg overflow-hidden">
+                  {/* 年度ヘッダー */}
+                  <button
+                    onClick={() => toggleFiscalYear(fiscalYear)}
+                    className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold text-sm sm:text-base">
+                        {fiscalYear}年度 ({fiscalYear}年4月〜{fiscalYear + 1}年3月)
+                      </span>
                     </div>
-                  </td>
-                  {months.map(month => {
-                    const categoryMonthTotal = usedSubcategories.reduce((sum, subCategory) => {
-                      const monthAssets = categoryData[mainCategory][subCategory][month]
-                      return sum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
-                    }, 0)
-                    
-                    return (
-                      <td key={month} className="border-r p-2 sm:p-4 text-right bg-muted/20">
-                        <div className="text-primary font-semibold text-xs sm:text-sm">
-                          {formatAmount(categoryMonthTotal)}
-                        </div>
-                      </td>
-                    )
-                  })}
-                </tr>
+                    {isOpen ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                  
+                  {/* 年度別テーブル */}
+                  {isOpen && (
+                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="sm:hidden text-xs text-blue-600 mb-2 text-center p-2">
+                        ← 左右にスワイプして全てのデータを確認 →
+                      </div>
+                      <table className="min-w-full border-collapse bg-card">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[80px] sm:min-w-[140px] z-20 text-xs sm:text-sm">
+                            カテゴリ
+                          </th>
+                          <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[90px] sm:min-w-[150px] z-20 text-xs sm:text-sm" style={{ left: '80px' }}>
+                            詳細
+                          </th>
+                          {yearMonths.map(month => (
+                            <th key={month} className="border-r p-2 sm:p-4 text-center font-semibold min-w-[100px] sm:min-w-[100px] text-xs sm:text-sm">
+                              {formatMonth(month)}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {usedCategories.map(mainCategory => {
+                          const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                          const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
+                            return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
+                          })
+                          
+                          return usedSubcategories.map((subCategory, subIndex) => {
+                            const subCategoryName = categoryInfo.subcategories[subCategory as keyof typeof categoryInfo.subcategories]
+                            const isFirstSubCategory = subIndex === 0
+                            
+                            return (
+                              <tr key={`${mainCategory}-${subCategory}`} className="border-b hover:bg-muted/20 transition-colors">
+                                {isFirstSubCategory && (
+                                  <td 
+                                    className="sticky left-0 bg-background border-r p-2 sm:p-4 font-semibold text-center align-middle border-b z-20"
+                                    rowSpan={usedSubcategories.length}
+                                  >
+                                    <div className="text-xs sm:text-sm text-primary bg-primary/10 px-1 sm:px-3 py-1 sm:py-2 rounded-md truncate">
+                                      <span className="hidden sm:inline">{categoryInfo.name}</span>
+                                      <span className="sm:hidden">
+                                        {categoryInfo.name === '現金・預金' ? '現金' : 
+                                         categoryInfo.name === '証券・投資' ? '投資' :
+                                         categoryInfo.name === '仮想通貨' ? '仮想' :
+                                         categoryInfo.name === 'その他' ? '他' : categoryInfo.name}
+                                      </span>
+                                    </div>
+                                  </td>
+                                )}
+                                <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-20" style={{ left: '80px' }}>
+                                  <div className="pl-1 sm:pl-2 font-medium text-muted-foreground truncate">
+                                    <span className="hidden sm:inline">{subCategoryName}</span>
+                                    <span className="sm:hidden">
+                                      {subCategoryName.length > 6 ? subCategoryName.substring(0, 6) + '...' : subCategoryName}
+                                    </span>
+                                  </div>
+                                </td>
+                                {yearMonths.map(month => {
+                                  const monthAssets = categoryData[mainCategory][subCategory][month]
+                                  const totalAmount = monthAssets.reduce((sum, asset) => sum + calculateAfterTaxAmount(asset), 0)
+                                  const isEditing = editingCell?.mainCategory === mainCategory && 
+                                                   editingCell?.subCategory === subCategory && 
+                                                   editingCell?.month === month
+                                  
+                                  return (
+                                    <td key={month} className="border-r p-2 sm:p-4 text-right border-b">
+                                      {isEditing ? (
+                                        <div className="flex items-center justify-end space-x-1">
+                                          <input
+                                            type="number"
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            className="w-16 sm:w-24 p-1 sm:p-2 text-xs sm:text-sm border rounded-md text-right focus:ring-2 focus:ring-primary focus:border-primary"
+                                            min="0"
+                                            step="1"
+                                            autoFocus
+                                          />
+                                          <button
+                                            onClick={saveEdit}
+                                            className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                                          >
+                                            <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+                                          </button>
+                                          <button
+                                            onClick={cancelEdit}
+                                            className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                          >
+                                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center justify-end space-x-1 group">
+                                          <button
+                                            onClick={() => startEditing(mainCategory, subCategory, month)}
+                                            className="opacity-0 group-hover:opacity-100 p-1 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                                          >
+                                            <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                          </button>
+                                          <span className="text-xs sm:text-sm font-medium">
+                                            {formatAmount(totalAmount)}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </td>
+                                  )
+                                })}
+                              </tr>
+                            )
+                          })
+                        })}
+                        
+                        {/* 合計行 */}
+                        <tr className="bg-gray-100 dark:bg-gray-800 font-semibold border-t-2 border-primary/20">
+                          <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                            <div className="text-primary font-bold text-xs sm:text-sm">
+                              合計
+                            </div>
+                          </td>
+                          {yearMonths.map(month => {
+                            const monthTotal = usedCategories.reduce((sum, mainCategory) => {
+                              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                              return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
+                                const monthAssets = categoryData[mainCategory][subCategory][month]
+                                return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
+                              }, 0)
+                            }, 0)
+                            
+                            return (
+                              <td key={month} className="border-r p-2 sm:p-4 text-right">
+                                <div className="text-primary font-bold text-xs sm:text-sm">
+                                  {formatAmount(monthTotal)}
+                                </div>
+                              </td>
+                            )
+                          })}
+            </tr>
+
+                        {/* 先月対比行 */}
+                        <tr className="bg-gray-100 dark:bg-gray-800 border-b">
+                          <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                            <div className="text-blue-400 font-semibold text-xs sm:text-sm">
+                              先月対比
+                            </div>
+                          </td>
+                          {yearMonths.map((month, index) => {
+                            const monthTotal = usedCategories.reduce((sum, mainCategory) => {
+                              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                              return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
+                                const monthAssets = categoryData[mainCategory][subCategory][month]
+                                return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
+                              }, 0)
+                            }, 0)
+                            
+                            // 前月の合計を計算
+                            const prevMonth = index > 0 ? yearMonths[index - 1] : null
+                            const prevMonthTotal = prevMonth ? usedCategories.reduce((sum, mainCategory) => {
+                              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                              return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
+                                const monthAssets = categoryData[mainCategory][subCategory][prevMonth]
+                                return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
+                              }, 0)
+                            }, 0) : 0
+                            
+                            const difference = monthTotal - prevMonthTotal
+                            const percentChange = prevMonthTotal > 0 ? (difference / prevMonthTotal) * 100 : 0
+                            
+                            return (
+                              <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
+                                {index === 0 ? (
+                                  <div className="text-gray-400 text-xs sm:text-sm">-</div>
+                                ) : (
+                                  <div className="text-xs sm:text-sm">
+                                    <div className={`font-semibold ${difference >= 0 ? 'text-blue-400' : 'text-red-600'}`}>
+                                      {difference >= 0 ? '+' : ''}{formatAmount(difference)}
+                                    </div>
+                                    <div className={`text-xs ${difference >= 0 ? 'text-blue-300' : 'text-red-500'}`}>
+                                      {difference >= 0 ? '+' : ''}{percentChange.toFixed(1)}%
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+                            )
+                          })}
+            </tr>
+
+                        {/* 昨年同月対比行 */}
+                        <tr className="bg-gray-100 dark:bg-gray-800 border-b">
+                          <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                            <div className="text-green-400 font-semibold text-xs sm:text-sm">
+                              昨年同月対比
+                            </div>
+                          </td>
+                          {yearMonths.map(month => {
+                            const monthTotal = usedCategories.reduce((sum, mainCategory) => {
+                              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                              return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
+                                const monthAssets = categoryData[mainCategory][subCategory][month]
+                                return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
+                              }, 0)
+                            }, 0)
+                            
+                            
+                            // 昨年同月の合計を計算（修正版）
+                            const [year, monthNum] = month.split('-')
+                            const lastYearMonth = `${parseInt(year) - 1}-${monthNum}`
+                            
+                            // 昨年同月の資産を直接検索（元の方法に戻す）
+                            const lastYearAssets = assets.filter(asset => {
+                              if (!asset || !asset.date) return false
+                              return asset.date.startsWith(lastYearMonth)
+                            })
+                            const lastYearMonthTotal = lastYearAssets.reduce((sum, asset) => {
+                              return sum + (asset.amount || 0)
+                            }, 0)
+                            
+                            const difference = monthTotal - lastYearMonthTotal
+                            const percentChange = lastYearMonthTotal > 0 ? (difference / lastYearMonthTotal) * 100 : 0
+                            
+                            return (
+                              <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
+                                {lastYearMonthTotal === 0 && monthTotal === 0 ? (
+                                  <div className="text-gray-400 text-xs sm:text-sm">-</div>
+                                ) : (
+                                  <div className="text-xs sm:text-sm">
+                                    <div className={`font-semibold ${difference >= 0 ? 'text-green-400' : 'text-red-600'}`}>
+                                      {difference >= 0 ? '+' : ''}{formatAmount(difference)}
+                                    </div>
+                                    <div className={`text-xs ${difference >= 0 ? 'text-green-300' : 'text-red-500'}`}>
+                                      {lastYearMonthTotal === 0 ? '∞%' : `${difference >= 0 ? '+' : ''}${percentChange.toFixed(1)}%`}
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+                            )
+                          })}
+            </tr>
+                        
+                        {/* 大カテゴリ別小計行（表示・非表示切り替え可能） */}
+                        {showSubtotals && usedCategories.map(mainCategory => {
+                          const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
+                          const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
+                            return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
+                          })
+                          
+                          return (
+                            <tr key={`${mainCategory}-subtotal`} className="bg-muted/20 border-b">
+                              <td className="sticky left-0 bg-muted/20 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                                <div className="text-primary font-semibold text-xs sm:text-sm">
+                                  {categoryInfo.name} 小計
+                                </div>
+                              </td>
+                              {yearMonths.map(month => {
+                                const categoryMonthTotal = usedSubcategories.reduce((sum, subCategory) => {
+                                  const monthAssets = categoryData[mainCategory][subCategory][month]
+                                  return sum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
+                                }, 0)
+                                
+                                return (
+                                  <td key={month} className="border-r p-2 sm:p-4 text-right bg-muted/20">
+                                    <div className="text-primary font-semibold text-xs sm:text-sm">
+                                      {formatAmount(categoryMonthTotal)}
+                                    </div>
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               )
             })}
-          </tbody>
-          </table>
         </div>
       )}
 
