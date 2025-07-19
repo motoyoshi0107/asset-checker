@@ -42,6 +42,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const [showAssetForm, setShowAssetForm] = useState(false)
   const [showDataManagement, setShowDataManagement] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showAssetClassTooltip, setShowAssetClassTooltip] = useState(false)
   const [dashboardData, setDashboardData] = useState(initialData)
   const [investmentSettings, setInvestmentSettings] = useState({
     annualRate: initialData.settings.annual_rate,
@@ -346,7 +347,25 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center space-x-2">
             <Target className="h-5 w-5 text-orange-600" />
-            <h3 className="text-sm font-medium">資産クラス</h3>
+            <h3 className="text-sm font-medium flex items-center gap-1">
+              資産クラス
+              <div className="relative">
+                <span 
+                  className="inline-flex items-center justify-center w-4 h-4 text-xs bg-gray-200 text-gray-600 rounded-full cursor-help hover:bg-gray-300"
+                  onMouseEnter={() => setShowAssetClassTooltip(true)}
+                  onMouseLeave={() => setShowAssetClassTooltip(false)}
+                >
+                  ?
+                </span>
+                {showAssetClassTooltip && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded-lg whitespace-nowrap z-10">
+                    <div>資産クラスとは、投資対象の種類別分類のことです。</div>
+                    <div>例：株式、その他、現金、仮想通貨など。分散投資のリスク管理に重要です。</div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                  </div>
+                )}
+              </div>
+            </h3>
           </div>
           <p className="text-2xl font-bold mt-2">
             {allocationData.length}
