@@ -334,7 +334,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                 <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[80px] sm:min-w-[140px] z-30 text-xs sm:text-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   カテゴリ
                 </th>
-                <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[90px] sm:min-w-[150px] z-30 text-xs sm:text-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" style={{ left: '140px' }}>
+                <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[90px] sm:min-w-[150px] z-30 text-xs sm:text-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" style={{ left: isDesktop ? '140px' : '80px' }}>
                   詳細
                 </th>
                 {displayMonths.map(month => (
@@ -373,7 +373,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                         </div>
                       </td>
                     )}
-                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-25 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" style={{ left: '140px' }}>
+                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-25 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" style={{ left: isDesktop ? '140px' : '80px' }}>
                       <div className="pl-1 sm:pl-2 font-medium text-muted-foreground truncate">
                         <span className="hidden sm:inline">{subCategoryName}</span>
                         <span className="sm:hidden">
