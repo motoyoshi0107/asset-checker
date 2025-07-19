@@ -298,7 +298,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
           </thead>
           <tbody>
             {usedCategories.map(mainCategory => {
-              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
               const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
                 return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
               })
@@ -396,7 +396,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
               </td>
               {months.map(month => {
                 const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
                   return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
                     const monthAssets = categoryData[mainCategory][subCategory][month]
                     return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
@@ -422,7 +422,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
               </td>
               {months.map((month, index) => {
                 const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
                   return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
                     const monthAssets = categoryData[mainCategory][subCategory][month]
                     return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
@@ -432,7 +432,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                 // 前月の合計を計算
                 const prevMonth = index > 0 ? months[index - 1] : null
                 const prevMonthTotal = prevMonth ? usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
                   return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
                     const monthAssets = categoryData[mainCategory][subCategory][prevMonth]
                     return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
@@ -470,7 +470,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
               </td>
               {months.map(month => {
                 const monthTotal = usedCategories.reduce((sum, mainCategory) => {
-                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+                  const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
                   return sum + Object.keys(categoryInfo.subcategories).reduce((catSum, subCategory) => {
                     const monthAssets = categoryData[mainCategory][subCategory][month]
                     return catSum + monthAssets.reduce((assetSum, asset) => assetSum + calculateAfterTaxAmount(asset), 0)
@@ -535,7 +535,7 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
             
             {/* 大カテゴリ別小計行（表示・非表示切り替え可能） */}
             {showSubtotals && usedCategories.map(mainCategory => {
-              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES]
+              const categoryInfo = ASSET_CATEGORIES[mainCategory as keyof typeof ASSET_CATEGORIES] as { name: string; subcategories: Record<string, string> }
               const usedSubcategories = Object.keys(categoryInfo.subcategories).filter(subCategory => {
                 return assets.some(asset => asset.category === mainCategory && asset.subcategory === subCategory)
               })
