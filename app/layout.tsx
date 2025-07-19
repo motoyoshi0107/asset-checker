@@ -81,9 +81,12 @@ export default function RootLayout({
         >
           {/* Navigation Header */}
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container mx-auto flex h-14 items-center justify-between px-4">
-              <div className="flex items-center space-x-6">
-                <h1 className="text-lg font-semibold">資産管理ダッシュボード</h1>
+            <div className="container mx-auto flex h-14 items-center justify-between px-2 sm:px-4">
+              <div className="flex items-center space-x-2 sm:space-x-6">
+                <h1 className="text-sm sm:text-lg font-semibold whitespace-nowrap">
+                  <span className="hidden sm:inline">資産管理ダッシュボード</span>
+                  <span className="sm:hidden">資産チェック</span>
+                </h1>
               </div>
               <ThemeToggle />
             </div>

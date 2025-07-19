@@ -259,26 +259,26 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">ダッシュボード</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">ダッシュボード</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             あなたの資産状況を把握し、将来の計画を立てましょう
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
           <button
             onClick={() => setShowDataManagement(true)}
-            className="flex items-center space-x-2 px-4 py-2 border rounded-md hover:bg-muted"
+            className="flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 border rounded-md hover:bg-muted text-sm font-medium"
           >
             <Settings className="h-4 w-4" />
             <span>データ管理</span>
           </button>
           <button
             onClick={() => setShowAssetForm(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            className="flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium"
           >
             <Plus className="h-4 w-4" />
             <span>資産入力</span>
@@ -316,21 +316,21 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-card border rounded-lg p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+        <div className="bg-card border rounded-lg p-4 sm:p-6">
           <div className="space-y-2 mb-4">
-            <h2 className="text-xl font-semibold">ポートフォリオ成長</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-lg sm:text-xl font-semibold">ポートフォリオ成長</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               時系列での資産推移を確認
             </p>
           </div>
           <PortfolioChart data={chartData} />
         </div>
 
-        <div className="bg-card border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-4 sm:p-6">
           <div className="space-y-2 mb-4">
-            <h2 className="text-xl font-semibold">資産配分</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-lg sm:text-xl font-semibold">資産配分</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               選択した月のポートフォリオ分散状況
             </p>
           </div>
@@ -347,10 +347,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
 
       {/* Forecast Section */}
-      <div className="bg-card border rounded-lg p-6">
-        <div className="space-y-2 mb-6">
-          <h2 className="text-xl font-semibold">投資シミュレーション</h2>
-          <p className="text-sm text-muted-foreground">
+      <div className="bg-card border rounded-lg p-4 sm:p-6">
+        <div className="space-y-2 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold">投資シミュレーション</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             パラメータを調整して将来のポートフォリオ成長を予測
           </p>
         </div>

@@ -237,15 +237,18 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
   return (
     <div className="bg-card border rounded-lg p-6">
       <div className="space-y-2 mb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <h2 className="text-xl font-semibold">月別資産管理表</h2>
-            <p className="text-sm text-muted-foreground">
-              各月の資産残高を確認・編集できます（横スクロール可能）
+            <h2 className="text-lg sm:text-xl font-semibold">月別資産管理表</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              各月の資産残高を確認・編集できます
+            </p>
+            <p className="text-xs text-blue-600 sm:hidden">
+              👆 横スクロールで全データを確認
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium">小計表示</label>
+            <label className="text-xs sm:text-sm font-medium">小計表示</label>
             <button
               onClick={() => setShowSubtotals(!showSubtotals)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -273,18 +276,21 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="sm:hidden text-xs text-blue-600 mb-2 text-center">
+            ← 左右にスワイプして全てのデータを確認 →
+          </div>
           <table className="min-w-full border-collapse bg-card">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="sticky left-0 bg-background border-r p-4 text-left font-semibold min-w-[140px] z-20">
+              <th className="sticky left-0 bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[120px] sm:min-w-[140px] z-20 text-xs sm:text-sm">
                 カテゴリ
               </th>
-              <th className="sticky bg-background border-r p-4 text-left font-semibold min-w-[150px] z-20" style={{ left: '140px' }}>
+              <th className="sticky bg-background border-r p-2 sm:p-4 text-left font-semibold min-w-[130px] sm:min-w-[150px] z-20 text-xs sm:text-sm" style={{ left: '120px' }}>
                 詳細
               </th>
               {months.map(month => (
-                <th key={month} className="border-r p-4 text-center font-semibold min-w-[100px]">
+                <th key={month} className="border-r p-2 sm:p-4 text-center font-semibold min-w-[80px] sm:min-w-[100px] text-xs sm:text-sm">
                   {formatMonth(month)}
                 </th>
               ))}
@@ -305,16 +311,16 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                   <tr key={`${mainCategory}-${subCategory}`} className="border-b hover:bg-muted/20 transition-colors">
                     {isFirstSubCategory && (
                       <td 
-                        className="sticky left-0 bg-background border-r p-4 font-semibold text-center align-middle border-b z-20"
+                        className="sticky left-0 bg-background border-r p-2 sm:p-4 font-semibold text-center align-middle border-b z-20"
                         rowSpan={usedSubcategories.length}
                       >
-                        <div className="text-sm text-primary bg-primary/10 px-3 py-2 rounded-md">
+                        <div className="text-xs sm:text-sm text-primary bg-primary/10 px-2 sm:px-3 py-1 sm:py-2 rounded-md">
                           {categoryInfo.name}
                         </div>
                       </td>
                     )}
-                    <td className="sticky bg-background border-r p-4 text-sm border-b z-20" style={{ left: '140px' }}>
-                      <div className="pl-2 font-medium text-muted-foreground">
+                    <td className="sticky bg-background border-r p-2 sm:p-4 text-xs sm:text-sm border-b z-20" style={{ left: '120px' }}>
+                      <div className="pl-1 sm:pl-2 font-medium text-muted-foreground">
                         {subCategoryName}
                       </div>
                     </td>
@@ -326,40 +332,40 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                                        editingCell?.month === month
                       
                       return (
-                        <td key={month} className="border-r p-4 text-right border-b">
+                        <td key={month} className="border-r p-2 sm:p-4 text-right border-b">
                           {isEditing ? (
-                            <div className="flex items-center justify-end space-x-2">
+                            <div className="flex items-center justify-end space-x-1">
                               <input
                                 type="number"
                                 value={editValue}
                                 onChange={(e) => setEditValue(e.target.value)}
-                                className="w-24 p-2 text-sm border rounded-md text-right focus:ring-2 focus:ring-primary focus:border-primary"
+                                className="w-16 sm:w-24 p-1 sm:p-2 text-xs sm:text-sm border rounded-md text-right focus:ring-2 focus:ring-primary focus:border-primary"
                                 min="0"
                                 step="1"
                                 autoFocus
                               />
                               <button
                                 onClick={saveEdit}
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                                className="p-1 sm:p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
                               >
-                                <Check className="h-4 w-4" />
+                                <Check className="h-3 w-3 sm:h-4 sm:w-4" />
                               </button>
                               <button
                                 onClick={cancelEdit}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                className="p-1 sm:p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                               >
-                                <X className="h-4 w-4" />
+                                <X className="h-3 w-3 sm:h-4 sm:w-4" />
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-end space-x-2 group">
+                            <div className="flex items-center justify-end space-x-1 group">
                               <button
                                 onClick={() => startEditing(mainCategory, subCategory, month)}
-                                className="opacity-0 group-hover:opacity-100 p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                                className="opacity-0 group-hover:opacity-100 p-1 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-all"
                               >
-                                <Edit2 className="h-4 w-4" />
+                                <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
                               </button>
-                              <span className="text-sm font-medium">
+                              <span className="text-xs sm:text-sm font-medium">
                                 {formatAmount(totalAmount)}
                               </span>
                             </div>
@@ -374,8 +380,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
             
             {/* 合計行 */}
             <tr className="bg-gray-100 dark:bg-gray-800 font-semibold border-t-2 border-primary/20">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-4 z-20" colSpan={2}>
-                <div className="text-primary font-bold">
+              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                <div className="text-primary font-bold text-xs sm:text-sm">
                   合計
                 </div>
               </td>
@@ -389,8 +395,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                 }, 0)
                 
                 return (
-                  <td key={month} className="border-r p-4 text-right">
-                    <div className="text-primary font-bold">
+                  <td key={month} className="border-r p-2 sm:p-4 text-right">
+                    <div className="text-primary font-bold text-xs sm:text-sm">
                       {formatAmount(monthTotal)}
                     </div>
                   </td>
@@ -400,8 +406,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
 
             {/* 先月対比行 */}
             <tr className="bg-gray-100 dark:bg-gray-800 border-b">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-4 z-20" colSpan={2}>
-                <div className="text-blue-400 font-semibold text-sm">
+              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                <div className="text-blue-400 font-semibold text-xs sm:text-sm">
                   先月対比
                 </div>
               </td>
@@ -428,11 +434,11 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                 const percentChange = prevMonthTotal > 0 ? (difference / prevMonthTotal) * 100 : 0
                 
                 return (
-                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-4 text-right">
+                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
                     {index === 0 ? (
-                      <div className="text-gray-400 text-sm">-</div>
+                      <div className="text-gray-400 text-xs sm:text-sm">-</div>
                     ) : (
-                      <div className="text-sm">
+                      <div className="text-xs sm:text-sm">
                         <div className={`font-semibold ${difference >= 0 ? 'text-blue-400' : 'text-red-600'}`}>
                           {difference >= 0 ? '+' : ''}{formatAmount(difference)}
                         </div>
@@ -448,8 +454,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
 
             {/* 昨年度同月対比行 */}
             <tr className="bg-gray-100 dark:bg-gray-800 border-b">
-              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-4 z-20" colSpan={2}>
-                <div className="text-green-400 font-semibold text-sm">
+              <td className="sticky left-0 bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                <div className="text-green-400 font-semibold text-xs sm:text-sm">
                   昨年同月対比
                 </div>
               </td>
@@ -500,11 +506,11 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                 const percentChange = lastYearMonthTotal > 0 ? (difference / lastYearMonthTotal) * 100 : 0
                 
                 return (
-                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-4 text-right">
+                  <td key={month} className="bg-gray-100 dark:bg-gray-800 border-r p-2 sm:p-4 text-right">
                     {lastYearMonthTotal === 0 && monthTotal === 0 ? (
-                      <div className="text-gray-400 text-sm">-</div>
+                      <div className="text-gray-400 text-xs sm:text-sm">-</div>
                     ) : (
-                      <div className="text-sm">
+                      <div className="text-xs sm:text-sm">
                         <div className={`font-semibold ${difference >= 0 ? 'text-green-400' : 'text-red-600'}`}>
                           {difference >= 0 ? '+' : ''}{formatAmount(difference)}
                         </div>
@@ -527,8 +533,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
               
               return (
                 <tr key={`${mainCategory}-subtotal`} className="bg-muted/20 border-b">
-                  <td className="sticky left-0 bg-muted/20 border-r p-4 z-20" colSpan={2}>
-                    <div className="text-primary font-semibold text-sm">
+                  <td className="sticky left-0 bg-muted/20 border-r p-2 sm:p-4 z-20" colSpan={2}>
+                    <div className="text-primary font-semibold text-xs sm:text-sm">
                       {categoryInfo.name} 小計
                     </div>
                   </td>
@@ -539,8 +545,8 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
                     }, 0)
                     
                     return (
-                      <td key={month} className="border-r p-4 text-right bg-muted/20">
-                        <div className="text-primary font-semibold text-sm">
+                      <td key={month} className="border-r p-2 sm:p-4 text-right bg-muted/20">
+                        <div className="text-primary font-semibold text-xs sm:text-sm">
                           {formatAmount(categoryMonthTotal)}
                         </div>
                       </td>
