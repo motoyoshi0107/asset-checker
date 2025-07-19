@@ -40,6 +40,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const [assets, setAssets] = useState<Asset[]>([])
   const [showAssetForm, setShowAssetForm] = useState(false)
   const [showDataManagement, setShowDataManagement] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [dashboardData, setDashboardData] = useState(initialData)
   const [investmentSettings, setInvestmentSettings] = useState({
     annualRate: initialData.settings.annual_rate,
@@ -158,6 +159,36 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     setShowDataManagement(false)
   }
 
+  // データリセット確認
+  const handleResetData = () => {
+    setShowResetConfirm(true)
+  }
+
+  // データリセット実行
+  const confirmResetData = () => {
+    // ローカルストレージをクリア
+    localStorage.removeItem('asset-checker-assets')
+    
+    // 状態をリセット
+    setAssets([])
+    setInvestmentSettings({
+      annualRate: initialData.settings.annual_rate,
+      monthlyInvest: initialData.settings.monthly_invest,
+      currentAmount: 0
+    })
+    
+    // ダッシュボードデータをリセット
+    setDashboardData({
+      chartData: [],
+      allocationData: [],
+      settings: initialData.settings
+    })
+    
+    setShowResetConfirm(false)
+    
+    console.log('Dashboard: All data has been reset')
+  }
+
   // チャートデータ変換関数（月毎に詳細カテゴリで集約）
   const transformAssetsToChartData = (assets: any[]) => {
     console.log('Transform assets to chart data:', assets)
@@ -267,6 +298,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           <p className="text-sm sm:text-base text-muted-foreground">
             あなたの資産状況を把握し、将来の計画を立てましょう
           </p>
+          <p className="text-xs sm:text-sm text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 px-3 py-2 rounded-md">
+            💾 データはローカルストレージに保存されます（あなたの端末内のみ・他人からは見えません）
+          </p>
         </div>
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
           <button
@@ -275,6 +309,13 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           >
             <Settings className="h-4 w-4" />
             <span>データ管理</span>
+          </button>
+          <button
+            onClick={handleResetData}
+            className="flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 text-sm font-medium"
+          >
+            <TrendingUp className="h-4 w-4 rotate-180" />
+            <span>リセット</span>
           </button>
           <button
             onClick={() => setShowAssetForm(true)}
@@ -388,6 +429,49 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               assets={assets}
               onImportData={handleImportData}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Dialog */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background border rounded-lg p-6 w-full max-w-md">
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-6 w-6 text-red-600 dark:text-red-400 rotate-180" />
+                </div>
+                <h2 className="text-lg font-semibold text-red-900 dark:text-red-100">
+                  全データをリセット
+                </h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  すべての資産データが削除されます。<br/>
+                  この操作は元に戻せません。
+                </p>
+              </div>
+              
+              <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+                <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                  ⚠️ リセット前にデータをエクスポートすることをお勧めします
+                </p>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 px-4 py-2 border rounded-md hover:bg-muted text-sm font-medium"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={confirmResetData}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+                >
+                  削除実行
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
