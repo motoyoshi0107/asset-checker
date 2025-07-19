@@ -7,8 +7,62 @@ import { ThemeToggle } from '@/components/theme-toggle'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: '資産管理ダッシュボード',
-  description: '資産、支出、投資目標を管理しましょう',
+  title: '資産チェック - 日本語対応の個人資産管理ダッシュボード',
+  description: '現金・預金、証券・投資、仮想通貨などの資産を一元管理。税率対応、投資シミュレーション機能付きの日本語対応資産管理ツール。',
+  keywords: ['資産管理', '投資', 'ポートフォリオ', '家計簿', '仮想通貨', 'NISA', 'iDeCo'],
+  authors: [{ name: '資産チェック' }],
+  creator: '資産チェック',
+  publisher: '資産チェック',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://steady-babka-a5fda8.netlify.app'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: '資産チェック - 日本語対応の個人資産管理ダッシュボード',
+    description: '現金・預金、証券・投資、仮想通貨などの資産を一元管理。税率対応、投資シミュレーション機能付きの日本語対応資産管理ツール。',
+    url: 'https://steady-babka-a5fda8.netlify.app',
+    siteName: '資産チェック',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: '資産チェック - 日本語対応の個人資産管理ダッシュボード',
+      },
+    ],
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '資産チェック - 日本語対応の個人資産管理ダッシュボード',
+    description: '現金・預金、証券・投資、仮想通貨などの資産を一元管理。税率対応、投資シミュレーション機能付き。',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({
