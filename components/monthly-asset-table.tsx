@@ -74,8 +74,8 @@ const ASSET_CATEGORIES = {
 const calculateAfterTaxAmount = (asset: Asset): number => {
   // 仮想通貨で税率が設定されている場合のみ税金を差し引く
   if (asset.category === 'crypto' && asset.taxRate && asset.taxRate > 0) {
-    // 税率を適用して税引き後の金額を計算
-    return asset.amount * (1 - asset.taxRate / 100)
+    // 税率を適用して税引き後の金額を計算し、四捨五入
+    return Math.round(asset.amount * (1 - asset.taxRate / 100))
   }
   // その他の資産は税引き前の金額をそのまま返す
   return asset.amount
@@ -231,7 +231,9 @@ export function MonthlyAssetTable({ assets, onUpdateAsset, onDeleteAsset }: Mont
   // 金額の表示形式
   const formatAmount = (amount: number) => {
     if (amount === 0) return '-'
-    return `¥${amount.toLocaleString()}`
+    // 四捨五入して整数にする
+    const roundedAmount = Math.round(amount)
+    return `¥${roundedAmount.toLocaleString()}`
   }
 
   return (
